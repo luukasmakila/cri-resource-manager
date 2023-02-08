@@ -193,7 +193,7 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 cgroups:
 - /sys/fs/kubepod.test
 swapoutms: 10000
-tracker:
+tracker: |
   name: idlepage
   config:
     pagesinregion: 512
