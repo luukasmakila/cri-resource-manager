@@ -189,19 +189,24 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 		fmt.Printf("Error unmarshaling YAML: %v\n", err)
 	}
 
-	policy.Policy.Config = `intervalms: 10000
+	yamlData := `intervalms: 10000
 cgroups:
-- /sys/fs/kubepod.test
+- /sys/fs/cgroup/swapus
 swapoutms: 10000
-tracker: |
+tracker:
   name: idlepage
-  config:
+  config: |
     pagesinregion: 512
     maxcountperregion: 1
     scanintervalms: 10000
 mover:
   intervalms: 20
   bandwidth: 100`
+
+	fullCgroupPathString := string(fullCgroupPath)
+	modifiedYamlData := strings.Replace(yamlData, "/sys/fs/cgroup/swapus", fullCgroupPathString, -1)
+
+	policy.Policy.Config = modifiedYamlData
 
 	out, err := yaml.Marshal(&policy)
 	if err != nil {
