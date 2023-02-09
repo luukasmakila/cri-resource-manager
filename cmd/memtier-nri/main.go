@@ -127,103 +127,9 @@ func (p *plugin) PostCreateContainer(pod *api.PodSandbox, ctr *api.Container) er
 func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	log.Infof("Starting container %s/%s/%s...", pod.GetNamespace(), pod.GetName(), ctr.GetName())
 
-	////////////////////////////////////////////////
-	// Get the cgroup path for the new container //
-	//////////////////////////////////////////////
-
-	cgroupPath := ctr.Linux.CgroupsPath
-
-	split := strings.Split(cgroupPath, ":")
-
-	partOne := split[0]
-	partTwo := fmt.Sprintf("%s-%s.scope", split[1], split[2])
-
-	partialPath := fmt.Sprintf("%s/%s", partOne, partTwo)
-
-	fullPath := fmt.Sprintf("*/kubepods*/%s", partialPath)
-
-	file, err := os.Open("/proc/mounts")
-	if err != nil {
-		log.Fatalf("failed to open /proc/mounts: %v", err)
-	}
-	defer file.Close()
-
-	cgroupMountPoint := ""
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		fields := strings.Fields(line)
-		if fields[0] == "cgroup2" {
-			cgroupMountPoint = fields[1]
-			break
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("failed to read /proc/mounts: %v", err)
-	}
-
-	findCmd := exec.Command("find", cgroupMountPoint, "-type", "d", "-wholename", fullPath)
-
-	fullCgroupPath, err := findCmd.Output()
-	if err != nil {
-		log.Fatalf("failed to run find command: %v", err)
-	}
-
-	log.Printf("Cgroup path: %s", string(fullCgroupPath))
-
-	//////////////////////////////////////////////////////
-	// Add the new cgroup path to memtierd-config.yaml //
-	////////////////////////////////////////////////////
-
-	yamlFile, err := ioutil.ReadFile("memtierd-config.yaml")
-	if err != nil {
-		fmt.Printf("Error reading YAML file: %v\n", err)
-	}
-
-	var policy MemtierdYamlConfig
-	err = yaml.Unmarshal(yamlFile, &policy)
-	if err != nil {
-		fmt.Printf("Error unmarshaling YAML: %v\n", err)
-	}
-
-	configFieldString := string(policy.Policy.Config)
-
-	fullCgroupPathString := string(fullCgroupPath)
-	modifiedConfigYamlData := strings.Replace(configFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
-
-	policy.Policy.Config = modifiedConfigYamlData
-
-	out, err := yaml.Marshal(&policy)
-	if err != nil {
-		fmt.Printf("Error marshaling YAML: %v\n", err)
-	}
-
-	err = ioutil.WriteFile("memtierd-config.yaml", out, 0644)
-	if err != nil {
-		fmt.Printf("Error writing YAML file: %v\n", err)
-	}
-
-	cat, err := exec.Command("cat", "memtierd-config.yaml").Output()
-	if err != nil {
-		fmt.Printf("Error writing YAML file: %v\n", err)
-	}
-
-	log.Infof("Yaml: %s", cat)
-
-	log.Infof("YAML file successfully modified.")
-
-	////////////////////////////////////////////////////
-	// Start Memtierd using the modified config file //
-	//////////////////////////////////////////////////
-
-	log.Infof("Starting Memtierd")
-
-	out2, err := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml >/tmp/memtierd.pod0c0.output 2>&1").Output()
-	if err != nil {
-		fmt.Printf("An error occurred: %s", err)
-	}
-	output2 := string(out2[:])
-	log.Infof("Result of memtierd: %s", output2)
+	fullCgroupPath := getFullCgroupPath(ctr)
+	addCgroupPathToConfig(fullCgroupPath)
+	startMemtierd()
 
 	return nil
 }
@@ -275,6 +181,100 @@ func (p *plugin) RemoveContainer(pod *api.PodSandbox, ctr *api.Container) error 
 func (p *plugin) onClose() {
 	log.Infof("Connection to the runtime lost, exiting...")
 	os.Exit(0)
+}
+
+func getFullCgroupPath(ctr *api.Container) []byte {
+	cgroupPath := ctr.Linux.CgroupsPath
+
+	split := strings.Split(cgroupPath, ":")
+
+	partOne := split[0]
+	partTwo := fmt.Sprintf("%s-%s.scope", split[1], split[2])
+
+	partialPath := fmt.Sprintf("%s/%s", partOne, partTwo)
+
+	fullPath := fmt.Sprintf("*/kubepods*/%s", partialPath)
+
+	file, err := os.Open("/proc/mounts")
+	if err != nil {
+		log.Fatalf("failed to open /proc/mounts: %v", err)
+	}
+	defer file.Close()
+
+	cgroupMountPoint := ""
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		fields := strings.Fields(line)
+		if fields[0] == "cgroup2" {
+			cgroupMountPoint = fields[1]
+			break
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatalf("failed to read /proc/mounts: %v", err)
+	}
+
+	findCmd := exec.Command("find", cgroupMountPoint, "-type", "d", "-wholename", fullPath)
+
+	fullCgroupPath, err := findCmd.Output()
+	if err != nil {
+		log.Fatalf("failed to run find command: %v", err)
+	}
+
+	log.Printf("Cgroup path: %s", string(fullCgroupPath))
+
+	return fullCgroupPath
+}
+
+func addCgroupPathToConfig(fullCgroupPath []byte) {
+	yamlFile, err := ioutil.ReadFile("memtierd-config.yaml")
+	if err != nil {
+		fmt.Printf("Error reading YAML file: %v\n", err)
+	}
+
+	var policy MemtierdYamlConfig
+	err = yaml.Unmarshal(yamlFile, &policy)
+	if err != nil {
+		fmt.Printf("Error unmarshaling YAML: %v\n", err)
+	}
+
+	configFieldString := string(policy.Policy.Config)
+
+	fullCgroupPathString := string(fullCgroupPath)
+	modifiedConfigYamlData := strings.Replace(configFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
+
+	policy.Policy.Config = modifiedConfigYamlData
+
+	out, err := yaml.Marshal(&policy)
+	if err != nil {
+		fmt.Printf("Error marshaling YAML: %v\n", err)
+	}
+
+	err = ioutil.WriteFile("memtierd-config.yaml", out, 0644)
+	if err != nil {
+		fmt.Printf("Error writing YAML file: %v\n", err)
+	}
+
+	cat, err := exec.Command("cat", "memtierd-config.yaml").Output()
+	if err != nil {
+		fmt.Printf("Error writing YAML file: %v\n", err)
+	}
+
+	log.Infof("Yaml: %s", cat)
+
+	log.Infof("YAML file successfully modified.")
+}
+
+func startMemtierd() {
+	log.Infof("Starting Memtierd")
+
+	out2, err := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml >/tmp/memtierd.pod0c0.output 2>&1").Output()
+	if err != nil {
+		fmt.Printf("An error occurred: %s", err)
+	}
+	output2 := string(out2[:])
+	log.Infof("Result of memtierd: %s", output2)
 }
 
 func main() {
