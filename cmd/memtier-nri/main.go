@@ -43,7 +43,7 @@ type plugin struct {
 	mask stub.EventMask
 }
 
-type MemtierdYamlConfig struct {
+type MemtierdConfig struct {
 	Policy Policy `yaml:"policy"`
 }
 
@@ -229,35 +229,35 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 func addCgroupPathToConfig(fullCgroupPath []byte) {
 	yamlFile, err := ioutil.ReadFile("memtierd-config.yaml")
 	if err != nil {
-		fmt.Printf("Error reading YAML file: %v\n", err)
+		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
 
-	var policy MemtierdYamlConfig
-	err = yaml.Unmarshal(yamlFile, &policy)
+	var memtierdConfig MemtierdConfig
+	err = yaml.Unmarshal(yamlFile, &memtierdConfig)
 	if err != nil {
-		fmt.Printf("Error unmarshaling YAML: %v\n", err)
+		log.Fatalf("Error unmarshaling YAML: %v\n", err)
 	}
 
-	configFieldString := string(policy.Policy.Config)
+	configFieldString := string(memtierdConfig.Policy.Config)
 
 	fullCgroupPathString := string(fullCgroupPath)
 	modifiedConfigYamlData := strings.Replace(configFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
 
-	policy.Policy.Config = modifiedConfigYamlData
+	memtierdConfig.Policy.Config = modifiedConfigYamlData
 
-	out, err := yaml.Marshal(&policy)
+	out, err := yaml.Marshal(&memtierdConfig)
 	if err != nil {
-		fmt.Printf("Error marshaling YAML: %v\n", err)
+		log.Fatalf("Error marshaling YAML: %v\n", err)
 	}
 
 	err = ioutil.WriteFile("memtierd-config.yaml", out, 0644)
 	if err != nil {
-		fmt.Printf("Error writing YAML file: %v\n", err)
+		log.Fatalf("Error writing YAML file: %v\n", err)
 	}
 
 	cat, err := exec.Command("cat", "memtierd-config.yaml").Output()
 	if err != nil {
-		fmt.Printf("Error writing YAML file: %v\n", err)
+		log.Fatalf("Error writing YAML file: %v\n", err)
 	}
 
 	log.Infof("Yaml: %s", cat)
@@ -270,7 +270,7 @@ func startMemtierd() {
 
 	out2, err := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml >/tmp/memtierd.pod0c0.output 2>&1").Output()
 	if err != nil {
-		fmt.Printf("An error occurred: %s", err)
+		log.Fatalf("An error occurred: %s", err)
 	}
 	output2 := string(out2[:])
 	log.Infof("Result of memtierd: %s", output2)
