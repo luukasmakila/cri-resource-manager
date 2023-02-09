@@ -133,15 +133,12 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 
 	cgroupPath := ctr.Linux.CgroupsPath
 
-	log.Infof("cgroup path: %s", cgroupPath)
-
 	split := strings.Split(cgroupPath, ":")
 
 	partOne := split[0]
 	partTwo := fmt.Sprintf("%s-%s.scope", split[1], split[2])
 
 	partialPath := fmt.Sprintf("%s/%s", partOne, partTwo)
-	log.Infof(partialPath)
 
 	fullPath := fmt.Sprintf("*/kubepods*/%s", partialPath)
 
@@ -189,24 +186,12 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 		fmt.Printf("Error unmarshaling YAML: %v\n", err)
 	}
 
-	yamlData := `intervalms: 10000
-cgroups:
-- /sys/fs/cgroup/swapus
-swapoutms: 10000
-tracker:
-  name: idlepage
-  config: |
-    pagesinregion: 512
-    maxcountperregion: 1
-    scanintervalms: 10000
-mover:
-  intervalms: 20
-  bandwidth: 100`
+	configFieldString := string(policy.Policy.Config)
 
 	fullCgroupPathString := string(fullCgroupPath)
-	modifiedYamlData := strings.Replace(yamlData, "/sys/fs/cgroup/swapus", fullCgroupPathString, -1)
+	modifiedConfigYamlData := strings.Replace(configFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
 
-	policy.Policy.Config = modifiedYamlData
+	policy.Policy.Config = modifiedConfigYamlData
 
 	out, err := yaml.Marshal(&policy)
 	if err != nil {
@@ -223,9 +208,9 @@ mover:
 		fmt.Printf("Error writing YAML file: %v\n", err)
 	}
 
-	log.Infof("Rseult of cat: %s", cat)
+	log.Infof("Yaml: %s", cat)
 
-	fmt.Println("YAML file successfully modified.")
+	log.Infof("YAML file successfully modified.")
 
 	////////////////////////////////////////////////////
 	// Start Memtierd using the modified config file //
