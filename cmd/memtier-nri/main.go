@@ -268,12 +268,12 @@ func addCgroupPathToConfig(fullCgroupPath []byte) {
 func startMemtierd() {
 	log.Infof("Starting Memtierd")
 
-	out2, err := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml >/tmp/memtierd.pod0c0.output 2>&1").Output()
+	out, err := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml >/tmp/memtierd.pod0c0.output 2>&1").Output()
 	if err != nil {
 		log.Fatalf("An error occurred: %s", err)
 	}
-	output2 := string(out2[:])
-	log.Infof("Result of memtierd: %s", output2)
+	output := string(out[:])
+	log.Infof("Result of memtierd: %s", output)
 }
 
 func main() {
