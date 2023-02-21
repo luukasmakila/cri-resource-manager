@@ -213,7 +213,6 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 	if err := scanner.Err(); err != nil {
 		log.Fatalf("failed to read /proc/mounts: %v", err)
 	}
-
 	findCmd := exec.Command("find", cgroupMountPoint, "-type", "d", "-wholename", fullPath)
 
 	fullCgroupPath, err := findCmd.Output()
@@ -268,7 +267,7 @@ func addCgroupPathToConfig(fullCgroupPath []byte) {
 func startMemtierd() {
 	log.Infof("Starting Memtierd")
 
-	out, err := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml >/tmp/memtierd.pod0c0.output 2>&1").Output()
+	out, err := exec.Command("sh", "-c", "socat unix-listen:/host/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml -debug >/host/tmp/memtierd.pod0c0.output 2>&1").Output()
 	if err != nil {
 		log.Fatalf("An error occurred: %s", err)
 	}

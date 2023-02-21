@@ -1,6 +1,6 @@
 FROM debian:stable-slim
 
-RUN apt-get update && apt-get install -y software-properties-common gnupg make curl sudo git
+RUN apt-get update && apt-get install -y software-properties-common gnupg make curl sudo git socat
 
 # Install Go 1.19
 RUN curl -LO https://golang.org/dl/go1.19.linux-amd64.tar.gz && \
@@ -24,8 +24,6 @@ RUN sudo mkdir -p /opt/nri/plugins/
 
 RUN mv memtier-nri /opt/nri/plugins/10-memtier-nri
 
-RUN touch /var/run/nri.sock
-
-RUN sudo sh -c "mkdir -p /etc/nri; touch /etc/nri/nri.conf"
+RUN mv memtierd /bin
 
 CMD ["/opt/nri/plugins/10-memtier-nri"]
