@@ -1,6 +1,6 @@
 FROM debian:stable-slim
 
-RUN apt-get update && apt-get install -y software-properties-common gnupg make curl sudo git socat
+RUN apt-get update && apt-get install -y software-properties-common build-essential gnupg make curl sudo git socat vim
 
 # Install Go 1.19
 RUN curl -LO https://golang.org/dl/go1.19.linux-amd64.tar.gz && \
@@ -18,7 +18,7 @@ RUN GO111MODULE=on go get -u github.com/containerd/nri/pkg/stub
 RUN GO111MODULE=on go get -u github.com/sirupsen/logrus
 RUN GO111MODULE=on go get -u gopkg.in/yaml.v2
 
-RUN go build .
+RUN go build -gcflags "all=-N -l"
 
 RUN sudo mkdir -p /opt/nri/plugins/
 

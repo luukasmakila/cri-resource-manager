@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	"gopkg.in/yaml.v2"
 
@@ -267,12 +268,25 @@ func addCgroupPathToConfig(fullCgroupPath []byte) {
 func startMemtierd() {
 	log.Infof("Starting Memtierd")
 
-	out, err := exec.Command("sh", "-c", "socat unix-listen:/host/tmp/memtierd.pod0c0.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml -debug >/host/tmp/memtierd.pod0c0.output 2>&1").Output()
+	// Open the output file for writing
+	outputFile, err := os.OpenFile("/host/tmp/memtierd.memtier-pod.output", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		log.Fatalf("An error occurred: %s", err)
+		fmt.Printf("Failed to open output file: %v\n", err)
 	}
-	output := string(out[:])
-	log.Infof("Result of memtierd: %s", output)
+	defer outputFile.Close()
+
+	// Create the command and set its output to the file
+	cmd := exec.Command("sh", "-c", "socat unix-listen:/host/tmp/memtierd.memtier-pod.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml -debug")
+	cmd.Stdout = outputFile
+	cmd.Stderr = outputFile
+
+	// Start the command in a new session and process group
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+
+	// Start the command in the background
+	if err := cmd.Start(); err != nil {
+		fmt.Printf("Failed to start command: %v\n", err)
+	}
 }
 
 func main() {
