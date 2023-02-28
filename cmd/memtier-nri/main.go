@@ -130,8 +130,8 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	podName := pod.GetName()
 
 	fullCgroupPath := getFullCgroupPath(ctr)
-	addCgroupPathToConfig(fullCgroupPath, podName)
-	startMemtierd()
+	configFilePath := addCgroupPathToConfig(fullCgroupPath, podName)
+	startMemtierd(configFilePath)
 
 	return nil
 }
@@ -228,8 +228,8 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 	return fullCgroupPath
 }
 
-func addCgroupPathToConfig(fullCgroupPath []byte, podName string) {
-	yamlFile, err := ioutil.ReadFile("/templates/memtierd-age-swapidle.yaml")
+func addCgroupPathToConfig(fullCgroupPath []byte, podName string) string {
+	yamlFile, err := ioutil.ReadFile("/home/ubuntu/templates/memtierd-age-swapidle.yaml")
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
@@ -252,7 +252,13 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string) {
 		log.Fatalf("Error marshaling YAML: %v\n", err)
 	}
 
-	configFilePath := fmt.Sprintf("/tmp/memtierd-configs/%s.yaml", podName)
+	// Create directory if it doesn't exist
+	podDircetory := fmt.Sprintf("/tmp/memtierd/%s", podName)
+	if err := os.MkdirAll(podDircetory, 0755); err != nil {
+		log.Fatalf("Error creating directory: %v", err)
+	}
+
+	configFilePath := fmt.Sprintf(podDircetory+"/%s.yaml", podName)
 	err = ioutil.WriteFile(configFilePath, out, 0644)
 	if err != nil {
 		log.Fatalf("Error writing YAML file: %v\n", err)
@@ -266,9 +272,10 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string) {
 	log.Infof("Yaml: %s", cat)
 
 	log.Infof("YAML file successfully modified.")
+	return configFilePath
 }
 
-func startMemtierd() {
+func startMemtierd(configFilePath string) {
 	log.Infof("Starting Memtierd")
 
 	// Open the output file for writing
@@ -279,7 +286,8 @@ func startMemtierd() {
 	defer outputFile.Close()
 
 	// Create the command and set its output to the file
-	cmd := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.memtierd-pod.sock,fork,unlink-early - | memtierd -config /tmp/memtierd/memtierd-pod/memtierd.yaml -debug")
+	socatCommand := fmt.Sprintf("socat unix-listen:/tmp/memtierd.memtierd-pod.sock,fork,unlink-early - | memtierd -config %s -debug", configFilePath)
+	cmd := exec.Command("sh", "-c", socatCommand)
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 
