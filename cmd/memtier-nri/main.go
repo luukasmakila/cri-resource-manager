@@ -127,8 +127,10 @@ func (p *plugin) PostCreateContainer(pod *api.PodSandbox, ctr *api.Container) er
 func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	log.Infof("Starting container %s/%s/%s...", pod.GetNamespace(), pod.GetName(), ctr.GetName())
 
+	podName := pod.GetName()
+
 	fullCgroupPath := getFullCgroupPath(ctr)
-	addCgroupPathToConfig(fullCgroupPath)
+	addCgroupPathToConfig(fullCgroupPath, podName)
 	startMemtierd()
 
 	return nil
@@ -226,8 +228,8 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 	return fullCgroupPath
 }
 
-func addCgroupPathToConfig(fullCgroupPath []byte) {
-	yamlFile, err := ioutil.ReadFile("memtierd-config.yaml")
+func addCgroupPathToConfig(fullCgroupPath []byte, podName string) {
+	yamlFile, err := ioutil.ReadFile("/templates/memtierd-age-swapidle.yaml")
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
@@ -250,12 +252,13 @@ func addCgroupPathToConfig(fullCgroupPath []byte) {
 		log.Fatalf("Error marshaling YAML: %v\n", err)
 	}
 
-	err = ioutil.WriteFile("memtierd-config.yaml", out, 0644)
+	configFilePath := fmt.Sprintf("/tmp/memtierd-configs/%s.yaml", podName)
+	err = ioutil.WriteFile(configFilePath, out, 0644)
 	if err != nil {
 		log.Fatalf("Error writing YAML file: %v\n", err)
 	}
 
-	cat, err := exec.Command("cat", "memtierd-config.yaml").Output()
+	cat, err := exec.Command("cat", configFilePath).Output()
 	if err != nil {
 		log.Fatalf("Error writing YAML file: %v\n", err)
 	}
@@ -269,14 +272,14 @@ func startMemtierd() {
 	log.Infof("Starting Memtierd")
 
 	// Open the output file for writing
-	outputFile, err := os.OpenFile("/host/tmp/memtierd.memtier-pod.output", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	outputFile, err := os.OpenFile("/tmp/memtierd.memtierd-pod.output", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open output file: %v\n", err)
 	}
 	defer outputFile.Close()
 
 	// Create the command and set its output to the file
-	cmd := exec.Command("sh", "-c", "socat unix-listen:/host/tmp/memtierd.memtier-pod.sock,fork,unlink-early - | memtierd -config memtierd-config.yaml -debug")
+	cmd := exec.Command("sh", "-c", "socat unix-listen:/tmp/memtierd.memtierd-pod.sock,fork,unlink-early - | memtierd -config /tmp/memtierd/memtierd-pod/memtierd.yaml -debug")
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 
