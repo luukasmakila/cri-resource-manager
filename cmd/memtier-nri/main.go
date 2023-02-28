@@ -130,8 +130,8 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	podName := pod.GetName()
 
 	fullCgroupPath := getFullCgroupPath(ctr)
-	configFilePath := addCgroupPathToConfig(fullCgroupPath, podName)
-	startMemtierd(configFilePath)
+	podDirectory := addCgroupPathToConfig(fullCgroupPath, podName)
+	startMemtierd(podName, podDirectory)
 
 	return nil
 }
@@ -171,6 +171,15 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 	// of the remaining running containers. Take a look at the functions in
 	// pkg/api/update.go to see the available controls.
 	//
+
+	podName := pod.GetName()
+
+	dirPath := fmt.Sprintf("/tmp/memtierd/%s", podName)
+
+	err := os.RemoveAll(dirPath)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	return []*api.ContainerUpdate{}, nil
 }
@@ -272,21 +281,32 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string) string {
 	log.Infof("Yaml: %s", cat)
 
 	log.Infof("YAML file successfully modified.")
-	return configFilePath
+	return podDircetory
 }
 
-func startMemtierd(configFilePath string) {
+func startMemtierd(podName string, podDirectory string) {
 	log.Infof("Starting Memtierd")
 
 	// Open the output file for writing
-	outputFile, err := os.OpenFile("/tmp/memtierd.memtierd-pod.output", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	outputFilePath := fmt.Sprintf("%s/memtierd.%s.output", podDirectory, podName)
+	outputFile, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open output file: %v\n", err)
 	}
 	defer outputFile.Close()
 
-	// Create the command and set its output to the file
-	socatCommand := fmt.Sprintf("socat unix-listen:/tmp/memtierd.memtierd-pod.sock,fork,unlink-early - | memtierd -config %s -debug", configFilePath)
+	socketPath := fmt.Sprintf(podDirectory+"/memtierd.%s.sock", podName)
+
+	file, err := os.Create(socketPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	// Create the command and set its output to the output file
+	configFilePath := fmt.Sprintf(podDirectory+"/%s.yaml", podName)
+
+	socatCommand := fmt.Sprintf("socat unix-listen:%s,fork,unlink-early - | memtierd -config %s -debug", socketPath, configFilePath)
 	cmd := exec.Command("sh", "-c", socatCommand)
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
