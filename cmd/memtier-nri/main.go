@@ -131,12 +131,12 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	annotations := pod.GetAnnotations()
 
 	// If memtierd annotation is not present, don't execute further
-	if _, ok := annotations["memtierd"]; !ok {
+	if _, ok := annotations["use-memtierd"]; !ok {
 		return nil
 	}
 
 	// Get the name of the template
-	template, ok := annotations["template-memtierd.intel.com"]
+	template, ok := annotations["template-memtierd"]
 	if !ok {
 		return nil
 	}
