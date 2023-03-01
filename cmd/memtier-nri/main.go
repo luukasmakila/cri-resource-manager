@@ -128,9 +128,21 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	log.Infof("Starting container %s/%s/%s...", pod.GetNamespace(), pod.GetName(), ctr.GetName())
 
 	podName := pod.GetName()
+	annotations := pod.GetAnnotations()
+
+	// If memtierd annotation is not present, don't execute further
+	if _, ok := annotations["memtierd"]; !ok {
+		return nil
+	}
+
+	// Get the name of the template
+	template, ok := annotations["template-memtierd.intel.com"]
+	if !ok {
+		return nil
+	}
 
 	fullCgroupPath := getFullCgroupPath(ctr)
-	podDirectory := addCgroupPathToConfig(fullCgroupPath, podName)
+	podDirectory := addCgroupPathToConfig(fullCgroupPath, podName, template)
 	startMemtierd(podName, podDirectory)
 
 	return nil
@@ -174,7 +186,8 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 
 	podName := pod.GetName()
 
-	dirPath := fmt.Sprintf("/tmp/memtierd/%s", podName)
+	// Run this only if memtierd is used
+	dirPath := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
 
 	err := os.RemoveAll(dirPath)
 	if err != nil {
@@ -237,8 +250,9 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 	return fullCgroupPath
 }
 
-func addCgroupPathToConfig(fullCgroupPath []byte, podName string) string {
-	yamlFile, err := ioutil.ReadFile("/home/ubuntu/templates/memtierd-age-swapidle.yaml")
+func addCgroupPathToConfig(fullCgroupPath []byte, podName string, template string) string {
+	templatePath := fmt.Sprintf("/templates/%s", template)
+	yamlFile, err := ioutil.ReadFile(templatePath)
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
@@ -262,7 +276,7 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string) string {
 	}
 
 	// Create directory if it doesn't exist
-	podDircetory := fmt.Sprintf("/tmp/memtierd/%s", podName)
+	podDircetory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
 	if err := os.MkdirAll(podDircetory, 0755); err != nil {
 		log.Fatalf("Error creating directory: %v", err)
 	}
