@@ -31,6 +31,20 @@ Here is an example:
 mv memtier-nri /opt/nri/plugins/10-memtier-nri
 ```
 
+Then just run:
+```console
+/opt/nri/plugin/10-memtier-nri
+```
+
+After that you should see something like the following:
+```console
+INFO   [0000] Created plugin 10-memtier-nri (10-memtier-nri, handles RunPodSandbox,StopPodSandbox,RemovePodSandbox,CreateContainer,PostCreateContainer,StartContainer,PostStartContainer,UpdateContainer,PostUpdateContainer,StopContainer,RemoveContainer)
+INFO   [0000] Registering plugin 10-memtier-nri...
+...
+```
+
+Now the plugin is ready to answer to events happening in your the cluster.
+
 ## <a name="enabling-nri-in-containerd"></a> Enabling NRI in containerd
 
 Replace the containerd version in the system with 1.7-beta.
