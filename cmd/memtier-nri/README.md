@@ -9,7 +9,7 @@ Run:
 docker build . -t memtierd-nri
 ```
 
-## Running a compiled version locally
+## Running a self compiled version locally
 
 Prerequisites:
 - NRI server enabled in containerd see [here](#enabling-nri-in-containerd)
