@@ -9,6 +9,8 @@ Run:
 docker build . -t memtierd-nri
 ```
 
+See [running Memtierd NRI plugin in a pod](#running-memtierd-nri-plugin-in-a-pod)
+
 ## Running a self compiled version locally
 
 Prerequisites:
@@ -58,6 +60,47 @@ vim /etc/containerd/config.toml
 Create a configuration or the NRI server will not start:
 ```console
 sudo sh -c "mkdir -p /etc/nri; touch /etc/nri/nri.conf; systemctl restart containerd"
+```
+
+## <a name="running-memtierd-nri-plugin-in-a-pod"></a> Running Memtierd NRI plugin in a pod
+
+To run Memtierd NRI plugin in a pod deploy the following pod to your cluster:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-memtier
+  labels:
+    app: pod-memtier
+  annotations:
+    policy.memtierd.intel.com: "age"
+    swapoutms.age.memtierd.intel.com: "10000"
+spec:
+  hostPID: true # <- Needed for Memtierd to be able to track processes on the host machine.
+  containers:
+  - name: pod-memtier
+    image: memtier-nri-image # Set this to your own image.
+    imagePullPolicy: Always
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: nri-socket
+        mountPath: /var/run/nri.sock
+      - name: host-volume
+        mountPath: /host
+      - name: host-bitmap
+        mountPath: /sys/kernel/mm/page_idle/bitmap
+  volumes:
+    - name: nri-socket
+      hostPath:
+        path: /var/run/nri.sock
+    - name: host-volume
+      hostPath:
+        path: /
+    - name: host-bitmap
+      hostPath:
+        path: /sys/kernel/mm/page_idle/bitmap
 ```
 
 ## Using memtierd with your deployments
