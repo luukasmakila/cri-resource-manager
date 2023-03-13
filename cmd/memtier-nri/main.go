@@ -194,6 +194,9 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 		fmt.Println(err)
 	}
 
+	//killMemtierdCmd := "pkill -9 -f memtierd"
+	//err :=
+
 	return []*api.ContainerUpdate{}, nil
 }
 
