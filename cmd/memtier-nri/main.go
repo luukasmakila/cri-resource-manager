@@ -45,7 +45,13 @@ type plugin struct {
 }
 
 type MemtierdConfig struct {
-	Policy Policy `yaml:"policy"`
+	Policy   Policy     `yaml:"policy"`
+	Routines []Routines `yaml:"routines"`
+}
+
+type Routines struct {
+	Name   string `yaml:"name"`
+	Config string `yaml:"config"`
 }
 
 type Policy struct {
@@ -131,12 +137,12 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	annotations := pod.GetAnnotations()
 
 	// If memtierd annotation is not present, don't execute further
-	if _, ok := annotations["use-memtierd"]; !ok {
+	if _, ok := annotations["memtierd"]; !ok {
 		return nil
 	}
 
 	// Get the name of the template
-	template, ok := annotations["template-memtierd"]
+	template, ok := annotations["template-memtierd.intel.com"]
 	if !ok {
 		return nil
 	}
@@ -186,16 +192,15 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 
 	podName := pod.GetName()
 
-	// Run this only if memtierd is used
 	dirPath := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
+
+	// TODO kill the memtierd process related to this pod
+	//killMemtierdCmd := "pkill -9 -f memtierd (can find by pod name???)"
 
 	err := os.RemoveAll(dirPath)
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	//killMemtierdCmd := "pkill -9 -f memtierd"
-	//err :=
 
 	return []*api.ContainerUpdate{}, nil
 }
@@ -260,31 +265,47 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string, template strin
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
 
+	// Create a directory for the pod if it doesn't exist
+	podDirectory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
+	if err := os.MkdirAll(podDirectory, 0755); err != nil {
+		log.Fatalf("Error creating directory: %v", err)
+	}
+
+	// Output file for memtierd routine
+	outputFilePath := fmt.Sprintf("%s/memtierd.%s.output2", podDirectory, podName)
+	outputFile, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Printf("Failed to open output file: %v\n", err)
+	}
+	defer outputFile.Close()
+
 	var memtierdConfig MemtierdConfig
 	err = yaml.Unmarshal(yamlFile, &memtierdConfig)
 	if err != nil {
 		log.Fatalf("Error unmarshaling YAML: %v\n", err)
 	}
 
-	configFieldString := string(memtierdConfig.Policy.Config)
-
 	fullCgroupPathString := string(fullCgroupPath)
-	modifiedConfigYamlData := strings.Replace(configFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
 
-	memtierdConfig.Policy.Config = modifiedConfigYamlData
+	// Edit the Policy and Routine configs
+	policyConfigFieldString := string(memtierdConfig.Policy.Config) // Make the cgroup path swapus not hardcoded?
+	policyConfigFieldString = strings.Replace(policyConfigFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
+
+	// Loop through the routines
+	for i := 0; i < len(memtierdConfig.Routines); i++ {
+		routineConfigFieldString := string(memtierdConfig.Routines[i].Config) // Make the path to pod container output not hardcoded?
+		routineConfigFieldString = strings.Replace(routineConfigFieldString, "/path/to/pod-container/paged_out.txt", outputFilePath, 1)
+		memtierdConfig.Routines[i].Config = routineConfigFieldString
+	}
+
+	memtierdConfig.Policy.Config = policyConfigFieldString
 
 	out, err := yaml.Marshal(&memtierdConfig)
 	if err != nil {
 		log.Fatalf("Error marshaling YAML: %v\n", err)
 	}
 
-	// Create directory if it doesn't exist
-	podDircetory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
-	if err := os.MkdirAll(podDircetory, 0755); err != nil {
-		log.Fatalf("Error creating directory: %v", err)
-	}
-
-	configFilePath := fmt.Sprintf(podDircetory+"/%s.yaml", podName)
+	configFilePath := fmt.Sprintf(podDirectory+"/%s.yaml", podName)
 	err = ioutil.WriteFile(configFilePath, out, 0644)
 	if err != nil {
 		log.Fatalf("Error writing YAML file: %v\n", err)
@@ -298,7 +319,7 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string, template strin
 	log.Infof("Yaml: %s", cat)
 
 	log.Infof("YAML file successfully modified.")
-	return podDircetory
+	return podDirectory
 }
 
 func startMemtierd(podName string, podDirectory string) {

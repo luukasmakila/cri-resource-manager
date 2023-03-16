@@ -51,3 +51,9 @@ policy:
       intervalms: 20
       # Bandwidth is memory swap out speed (in MB/s)
       bandwidth: 100
+routines:
+- name: statactions
+  config: |
+    intervalms: 10000
+    intervalcommand: ["stats -t process_madvise | while read pid rest; do grep -E 'VmSize|VmRSS|VmSwap' /proc/$pid/status 2>/dev/null ; done > /path/to/pod-container/paged_out.txt"]
+    intervalcommandrunner: memtier-prompt
