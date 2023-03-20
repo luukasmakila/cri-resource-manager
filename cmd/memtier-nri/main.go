@@ -194,10 +194,13 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 
 	dirPath := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
 
-	// TODO kill the memtierd process related to this pod
-	//killMemtierdCmd := "pkill -9 -f memtierd (can find by pod name???)"
+	// Kill the memtierd process
+	_, err := exec.Command("sudo", "pkill", "-9", "-f", dirPath).Output()
+	if err != nil {
+		log.Fatalf("Error writing YAML file: %v\n", err)
+	}
 
-	err := os.RemoveAll(dirPath)
+	err = os.RemoveAll(dirPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -266,18 +269,13 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string, template strin
 	}
 
 	// Create a directory for the pod if it doesn't exist
-	podDirectory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
+	podDirectory := fmt.Sprintf("/tmp/memtierd/%s", podName)
 	if err := os.MkdirAll(podDirectory, 0755); err != nil {
 		log.Fatalf("Error creating directory: %v", err)
 	}
 
 	// Output file for memtierd routine
 	outputFilePath := fmt.Sprintf("%s/memtierd.%s.output2", podDirectory, podName)
-	outputFile, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		fmt.Printf("Failed to open output file: %v\n", err)
-	}
-	defer outputFile.Close()
 
 	var memtierdConfig MemtierdConfig
 	err = yaml.Unmarshal(yamlFile, &memtierdConfig)
