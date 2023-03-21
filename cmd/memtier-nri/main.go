@@ -286,13 +286,13 @@ func addCgroupPathToConfig(fullCgroupPath []byte, podName string, template strin
 	fullCgroupPathString := string(fullCgroupPath)
 
 	// Edit the Policy and Routine configs
-	policyConfigFieldString := string(memtierdConfig.Policy.Config) // Make the cgroup path swapus not hardcoded?
-	policyConfigFieldString = strings.Replace(policyConfigFieldString, "/sys/fs/cgroup/swapus", fullCgroupPathString, 1)
+	policyConfigFieldString := string(memtierdConfig.Policy.Config)
+	policyConfigFieldString = strings.Replace(policyConfigFieldString, "$CGROUP2_ABS_PATH", fullCgroupPathString, 1)
 
 	// Loop through the routines
 	for i := 0; i < len(memtierdConfig.Routines); i++ {
-		routineConfigFieldString := string(memtierdConfig.Routines[i].Config) // Make the path to pod container output not hardcoded?
-		routineConfigFieldString = strings.Replace(routineConfigFieldString, "/path/to/pod-container/paged_out.txt", outputFilePath, 1)
+		routineConfigFieldString := string(memtierdConfig.Routines[i].Config)
+		routineConfigFieldString = strings.Replace(routineConfigFieldString, "$MEMTIERD_SWAP_STATS_PATH", outputFilePath, 1)
 		memtierdConfig.Routines[i].Config = routineConfigFieldString
 	}
 

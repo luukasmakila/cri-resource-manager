@@ -26,7 +26,8 @@ policy:
     # The policy manages processes that can be found under listed
     # cgroups paths.
     cgroups:
-      - /sys/fs/cgroup/swapus
+      - $CGROUP2_ABS_PATH
+    
     # If the tracker has not seen activity on a page region during last
     # swapoutms, the region will be swapped out.
     swapoutms: 10000
@@ -55,5 +56,5 @@ routines:
 - name: statactions
   config: |
     intervalms: 10000
-    intervalcommand: ["stats -t process_madvise | while read pid rest; do grep -E 'VmSize|VmRSS|VmSwap' /proc/$pid/status 2>/dev/null ; done > /path/to/pod-container/paged_out.txt"]
+    intervalcommand: ["stats -t process_madvise | while read pid rest; do grep -E 'VmSize|VmRSS|VmSwap' /proc/$pid/status 2>/dev/null ; done > $MEMTIERD_SWAP_STATS_PATH"]
     intervalcommandrunner: memtier-prompt
