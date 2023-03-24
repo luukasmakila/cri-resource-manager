@@ -7,6 +7,8 @@ Welcome to CRI Resource Manager's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   migration-to-NRI.md
+
    introduction.md
    quick-start.md
    installation.md
