@@ -1,12 +1,14 @@
-# Prerequisities
+# Migrating to NRI-based resource policies
+
+## Prerequisities
 
 - Up and running CRI Resource Manager
 - One of the two supported policies in use: balloons or topology-aware.
 - For other policies a little bit more work is required and the policies need to be 'ported'. This can be done by just following the example of how balloons or topology-aware were converted.
 
-# Steps for an initial/basic migration test
+## Steps for an initial/basic migration test
 
-## Containerd
+### Containerd
 
 Replace the containerd version in the system with 1.7 or newer version (NRI server not supported in older versions).
 
@@ -44,7 +46,7 @@ vim /etc/containerd/config.toml
 systemctl restart containerd
 ```
 
-## CRI-O
+### CRI-O
 
 Ensure that crio version 1.26.2 or newer is used.
 
@@ -72,7 +74,7 @@ crio --enable-nri config > $CRIO_CONF
 systemctl restart crio
 ```
 
-## Build the NRI policies
+### Build the NRI policies
 
 ```console
 git clone https://github.com/containers/nri-plugins.git
@@ -82,45 +84,45 @@ make
 make images IMAGE_REPO=my-repo IMAGE_VERSION=my-tag
 ```
 
-## Create required CRDs
+### Create required CRDs
 
 ```console
 kubectl apply -f deployment/base/crds/noderesourcetopology_crd.yaml
 ```
 
-## Import the image of the NRI plugin you want to run
+### Import the image of the NRI plugin you want to run
 
-### Containerd
+#### Containerd
 
 ```console
 ctr -n k8s.io images import build/images/nri-resmgr-topology-aware-image-*.tar
 ```
 
-### CRI-O
+#### CRI-O
 
 See the section [below](#steps-for-a-more-real-life-migration-using-self-hosted-image-repository) for instructions on how to push the images to a registry, then pull from there.
 
-## Deploy the plugin
+### Deploy the plugin
 
   ```console
   kubectl apply -f build/images/nri-resmgr-topology-aware-deployment.yaml
   ```
 
-## Deploy a test pod
+### Deploy a test pod
 
 ```console
 kubectl run mypod --image busybox -- sleep inf
 kubectl exec mypod  -- grep allowed_list: /proc/self/status
 ```
 
-## See the resources the pod got assigned with
+### See the resources the pod got assigned with
 
 ```console
 kubectl exec $pod -c $container  -- grep allowed_list: /proc/self/status
 # Output should look similar to the output of CRI-RM
 ```
 
-# Steps for a more real-life migration using self-hosted image repository
+## Steps for a more real-life migration using self-hosted image repository
 
 - Same steps as above for enabling NRI with Containerd/CRI-O and building the images.
 - Push the images built to your repository:
@@ -136,7 +138,7 @@ kubectl exec $pod -c $container  -- grep allowed_list: /proc/self/status
 
 - Then deploy the plugin simlarly to the earlier step.
 
-# Migrating existing configuration 
+## Migrating existing configuration
 
 - The ConfigMap used by the ported policies/infra has a different name/naming scheme than the original one used in CRI-RM, ex:
   - configMapName:
@@ -150,7 +152,7 @@ kubectl exec $pod -c $container  -- grep allowed_list: /proc/self/status
     + resource-policy.nri.io/group: $GROUP_NAME
     ```
 
-# Migrating existing workloads
+## Migrating existing workloads
 
 - The annotations one can use to customize how a policy treats a workload use slightly different keys than the original ones in CRI-RM. The collective 'key namespace' for policy- and resource-manager-specific annotation has been changed from cri-resource-manager.intel.com to resource-policy.nri.io.
 
