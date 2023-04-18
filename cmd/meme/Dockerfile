@@ -4,4 +4,4 @@ COPY . .
 
 RUN mv meme /bin
 
-CMD ["meme", "-bs", "500M", "-bwc", "1", "-bws", "100M", "-bwo", "200M", "-brc", "0", "-ttl", "24h"]
+CMD ["meme", "-bs", "1G", "-bwc", "1", "-bws", "100M", "-bwi", "1s", "-bwod", "17M", "-brc", "0", "-p", "10s", "-ttl", "24h"]

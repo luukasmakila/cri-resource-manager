@@ -136,16 +136,19 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	podName := pod.GetName()
 	containerName := ctr.GetName()
 	annotations := pod.GetAnnotations()
+	template := "memtierd-age-swapidle.yaml"
 
 	// If memtierd annotation is not present, don't execute further
-	if _, ok := annotations["memtierd"]; !ok {
+	priority, ok := annotations["class.memtierd.nri"]
+	if !ok {
 		return nil
 	}
 
-	// Get the name of the template
-	template, ok := annotations["template-memtierd.intel.com"]
-	if !ok {
-		return nil
+	if priority == "lowp-rio" {
+		template = "low-prio.yaml"
+	}
+	if priority == "high-prio" {
+		template = "high-prio.yaml"
 	}
 
 	fullCgroupPath := getFullCgroupPath(ctr)
@@ -192,7 +195,7 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 	//
 
 	podName := pod.GetName()
-	dirPath := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
+	dirPath := fmt.Sprintf("/tmp/memtierd/%s", podName)
 
 	// Kill the memtierd process
 	_, err := exec.Command("sudo", "pkill", "-f", dirPath).Output()
@@ -262,14 +265,14 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 }
 
 func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName string, template string) (string, string, string) {
-	templatePath := fmt.Sprintf("/templates/%s", template)
+	templatePath := fmt.Sprintf("/home/ubuntu/templates/%s", template)
 	yamlFile, err := ioutil.ReadFile(templatePath)
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
 
 	// Create directory if it doesn't exist
-	podDirectory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
+	podDirectory := fmt.Sprintf("/tmp/memtierd/%s", podName)
 	if err := os.MkdirAll(podDirectory, 0755); err != nil {
 		log.Fatalf("Error creating directory: %v", err)
 	}
