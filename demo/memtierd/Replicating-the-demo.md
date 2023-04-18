@@ -1,11 +1,35 @@
-## Replicating the demo
+# Replicating the Memtierd demo
 
-### Prerequisites
+## Prerequisites
+- Ubuntu system
+- Python 3
 - NRI enabled on your container runtime
 - Grafana dashboard ready to go
-- Grafana [infinity](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) data source plugin downloaded.
+- Grafana [infinity](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) data source plugin downloaded
 
-### Configuring the Memtierd NRI plugin:
+## Installing the Memtierd grafana dashboard
+
+- Go to the "Data Sources" tab and apply the Infinity data source
+- Go to the "Dashboards" section on Grafana
+- Click "New" and then "Import"
+- Download the "memtierd-demo-grafana-dashboard.json" file and import it
+- Select Infinity data source as the data source
+
+## Running the API
+
+You need to change the page faults and time series file paths in main.py to point to the correct json files found in data/
+
+Install FastAPI:
+```
+console pip install fastapi
+```
+
+Start the API with:
+```console
+uvicorn main:app --reload
+```
+
+## Configuring the Memtierd NRI plugin:
 
 Deploy the Memtier NRI plugin pod:
 ```yaml
@@ -42,7 +66,7 @@ spec:
         path: /sys/kernel/mm/page_idle/bitmap
 ```
 
-### Configuring the workloads
+## Deploying the workloads
 
 Deploy the high priority workloads:
 ```yaml
