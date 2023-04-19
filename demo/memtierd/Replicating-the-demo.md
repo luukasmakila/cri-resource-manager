@@ -77,7 +77,7 @@ metadata:
   labels:
     app: meme-pod-highprio
   annotations:
-    class.memtierd.nri: "high-prio"
+    class.memtierd.nri: "high-prio" # <-- this tells memtierd that these workloads are "high priority"
 spec:
   containers:
   - name: meme-pod-highprio-1-container
@@ -125,7 +125,7 @@ metadata:
   labels:
     app: meme-pod-lowprio
   annotations:
-    class.memtierd.nri: "low-prio"
+    class.memtierd.nri: "low-prio" # <-- This tells memtierd that these workloads are "low priority"
 spec:
   containers:
   - name: meme-pod-lowprio-1-container

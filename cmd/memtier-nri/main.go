@@ -144,7 +144,7 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 		return nil
 	}
 
-	if priority == "lowp-rio" {
+	if priority == "low-prio" {
 		template = "low-prio.yaml"
 	}
 	if priority == "high-prio" {
@@ -195,7 +195,7 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 	//
 
 	podName := pod.GetName()
-	dirPath := fmt.Sprintf("/tmp/memtierd/%s", podName)
+	dirPath := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
 
 	// Kill the memtierd process
 	_, err := exec.Command("sudo", "pkill", "-f", dirPath).Output()
@@ -265,14 +265,14 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 }
 
 func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName string, template string) (string, string, string) {
-	templatePath := fmt.Sprintf("/home/ubuntu/templates/%s", template)
+	templatePath := fmt.Sprintf("/host/home/ubuntu/templates/%s", template)
 	yamlFile, err := ioutil.ReadFile(templatePath)
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
 
 	// Create directory if it doesn't exist
-	podDirectory := fmt.Sprintf("/tmp/memtierd/%s", podName)
+	podDirectory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
 	if err := os.MkdirAll(podDirectory, 0755); err != nil {
 		log.Fatalf("Error creating directory: %v", err)
 	}
@@ -339,6 +339,9 @@ func startMemtierd(podName string, containerName string, podDirectory string, ou
 		fmt.Println(err)
 	}
 	defer file.Close()
+
+	log.Infof(socketPath)
+	log.Infof(configFilePath)
 
 	// Create the command and write its output to the output file
 	socatCommand := fmt.Sprintf("socat unix-listen:%s,fork,unlink-early - | memtierd -config %s", socketPath, configFilePath)
