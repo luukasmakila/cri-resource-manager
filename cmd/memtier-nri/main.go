@@ -195,12 +195,19 @@ func (p *plugin) StopContainer(pod *api.PodSandbox, ctr *api.Container) ([]*api.
 	//
 
 	podName := pod.GetName()
-	dirPath := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
+	dirPath := fmt.Sprintf("/tmp/memtierd/%s", podName)
 
 	// Kill the memtierd process
-	_, err := exec.Command("sudo", "pkill", "-f", dirPath).Output()
+	out, err := exec.Command("sudo", "pkill", "-f", dirPath).CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error writing YAML file: %v\n", err)
+		exitErr, ok := err.(*exec.ExitError)
+		if !ok || exitErr.ExitCode() != 1 {
+			// Error occurred that is not related to "no processes found"
+			log.Fatalf("Error killing memtierd process: %v. Output: %s\n", err, out)
+		} else {
+			// "No processes found" error, do nothing
+			log.Printf("No processes found for memtierd process\n")
+		}
 	}
 
 	err = os.RemoveAll(dirPath)

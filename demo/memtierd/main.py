@@ -5,6 +5,20 @@ import subprocess
 from fastapi import FastAPI
 
 
+# File path variables to fetch data from
+ZRAM_PATH =  "/sys/block/zram0/mm_stat"
+
+LOWPRIO_1_PATH = "/tmp/memtierd/meme-pod-lowprio/memtierd.meme-pod-lowprio-1-container.output"
+LOWPRIO_1_FILE_NAME = "memtierd.meme-pod-lowprio-1-container.output"
+LOWPRIO_1_TIME_SERIES_PATH = "/home/ubuntu/prometheus_backend/data/lowprio_1_time_series.json"
+LOWPRIO_1_PAGE_FAULTS_PATH = "/home/ubuntu/prometheus_backend/data/page_faults_lowprio_1.json"
+
+HIGHPRIO_1_PATH = "/tmp/memtierd/meme-pod-highprio/memtierd.meme-pod-highprio-1-container.output"
+HIGHPRIO_1_FILE_NAME = "memtierd.meme-pod-highprio-1-container.output"
+HIGHPRIO_1_TIME_SERIES_PATH = "/home/ubuntu/prometheus_backend/data/highprio_1_time_series.json"
+HIGHPRIO_1_PAGE_FAULTS_PATH = "/home/ubuntu/prometheus_backend/data/page_faults_highprio_1.json"
+
+
 app = FastAPI()
 
 
@@ -54,6 +68,7 @@ def add_page_fault_data(data, page_faults_data, page_faults_data_path, page_faul
 		json.dump(prev_data, file, indent=4)
 
 	data[file_name]["page_faults_total"] = prev_data[page_faults_data_key]
+
 
 def data_is_duplicate(data, new_entry, priority):
 	if len(data[priority]) != 0:
@@ -112,8 +127,7 @@ def handle_zram_and_compressed_data(data):
 	Handle the zram related stuff here
 	"""
 
-	# TODO: Figure out a way to not hardcode this path
-	file_path = "/sys/block/zram0/mm_stat"
+	file_path = ZRAM_PATH
 
 	orig_data_size = 0
 	comp_data_size = 0
@@ -127,6 +141,7 @@ def handle_zram_and_compressed_data(data):
 			mem_used_total = zram_data[2]
 
 	data["zram_and_compressed"] = {}
+
 	# Get total memory saved
 	saved_memory_total = (int(orig_data_size) - int(mem_used_total)) / 1000000000
 	data["zram_and_compressed"]["save_memory_total"] = saved_memory_total
@@ -209,20 +224,20 @@ def read_stats(fetch_time_series_highprio_1: int = 0, fetch_time_series_lowprio_
 	data = {}
 
 	# TODO: Figure out a way not to hardcode these paths, maybe check /tmp/memtierd recursively?
-	highprio_1_file_path = "/tmp/memtierd/meme-pod-highprio/memtierd.meme-pod-highprio-1-container.output"
-	lowprio_1_file_path = "/tmp/memtierd/meme-pod-lowprio/memtierd.meme-pod-lowprio-1-container.output"
+	highprio_1_file_path = HIGHPRIO_1_PATH
+	lowprio_1_file_path = LOWPRIO_1_PATH
 
-	highprio_1_file_name = "memtierd.meme-pod-highprio-1-container.output"
-	lowprio_1_file_name = "memtierd.meme-pod-lowprio-1-container.output"
+	highprio_1_file_name = HIGHPRIO_1_FILE_NAME
+	lowprio_1_file_name = HIGHPRIO_1_FILE_NAME
 
 	file_paths = [highprio_1_file_path, lowprio_1_file_path]
 
 	for file_path in file_paths:
 		if fetch_time_series_lowprio_1:
-			json_file_path = "/home/ubuntu/prometheus_backend/data/lowprio_1_time_series.json"
+			json_file_path = LOWPRIO_1_TIME_SERIES_PATH
 			data = handle_data(data, file_path, json_file_path, fetch_time_series_lowprio_1=fetch_time_series_lowprio_1)
 		if fetch_time_series_highprio_1:
-			json_file_path = "/home/ubuntu/prometheus_backend/data/highprio_1_time_series.json"
+			json_file_path = HIGHPRIO_1_TIME_SERIES_PATH
 			data = handle_data(data, file_path, json_file_path, fetch_time_series_highprio_1=fetch_time_series_highprio_1)
 		else:
 			data = handle_data(data, file_path)
@@ -247,13 +262,13 @@ def read_stats(fetch_time_series_highprio_1: int = 0, fetch_time_series_lowprio_
 	for i in range(len(page_faults_data)):
 		if fetch_page_faults_lowprio_1 and "lowprio-1" in page_faults_data[i]["config_path"]:
 			curr_file_name = lowprio_1_file_name
-			page_faults_data_path = "/home/ubuntu/prometheus_backend/data/page_faults_lowprio_1.json"
+			page_faults_data_path = LOWPRIO_1_PAGE_FAULTS_PATH
 			page_faults_data_key = "page_faults_lowprio_1"
 			add_page_fault_data(data, page_faults_data, page_faults_data_path, page_faults_data_key, curr_file_name,  i)
 
 		if fetch_page_faults_highprio_1 and "highprio-1" in page_faults_data[i]["config_path"]:
 			curr_file_name = highprio_1_file_name
-			page_faults_data_path = "/home/ubuntu/prometheus_backend/data/page_faults_highprio_1.json"
+			page_faults_data_path = HIGHPRIO_1_PAGE_FAULTS_PATH
 			page_faults_data_key = "page_faults_highprio_1"
 			add_page_fault_data(data, page_faults_data, page_faults_data_path, page_faults_data_key, curr_file_name,  i)
 

@@ -1,7 +1,7 @@
 # Replicating the Memtierd demo
 
 ## Prerequisites
-- Ubuntu system
+- Ubuntu system with a Swap
 - Python 3
 - NRI enabled on your container runtime
 - Grafana dashboard ready to go
@@ -17,7 +17,7 @@
 
 ## Running the API
 
-You need to change the page faults and time series file paths in main.py to point to the correct json files found in data/
+Edit the "path" variables found on the top of the main.py file to point to the correct data files in data/ aswell as zram path. When ran with the default workloads /tmp/memtierd directory will be created so unless the workload configurations are changed, those paths won't need editing.
 
 Install FastAPI:
 ```
