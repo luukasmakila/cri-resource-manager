@@ -1,47 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_MEMTIERD",
-      "label": "Memtierd",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "yesoreyeram-infinity-datasource",
-      "pluginName": "Infinity"
-    }
-  ],
-  "__elements": {},
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "9.4.1"
-    },
-    {
-      "type": "panel",
-      "id": "piechart",
-      "name": "Pie chart",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "stat",
-      "name": "Stat",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
-      "version": ""
-    },
-    {
-      "type": "datasource",
-      "id": "yesoreyeram-infinity-datasource",
-      "name": "Infinity",
-      "version": "1.3.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -67,14 +24,14 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -137,7 +94,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "table",
@@ -164,7 +121,7 @@
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -228,7 +185,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "table",
@@ -250,7 +207,7 @@
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -315,7 +272,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "table",
@@ -337,7 +294,7 @@
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -433,7 +390,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "table",
@@ -461,7 +418,7 @@
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -558,7 +515,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "timeseries",
@@ -586,7 +543,7 @@
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -666,7 +623,7 @@
           "columns": [
             {
               "selector": "page_faults_minor_diff",
-              "text": "Minor Page Faults Diff",
+              "text": "Page Faults Diff",
               "type": "number"
             },
             {
@@ -677,7 +634,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "table",
@@ -699,13 +656,13 @@
           }
         }
       ],
-      "title": "Page Faults Minor Diff Critical Container",
+      "title": "Minor Page Faults Diff Critical Container",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "${DS_MEMTIERD}"
+        "uid": "B_Smuzf4k"
       },
       "fieldConfig": {
         "defaults": {
@@ -784,7 +741,7 @@
         {
           "columns": [
             {
-              "selector": "page_faults_diff",
+              "selector": "page_faults_minor_diff",
               "text": "Page Faults Minor Diff",
               "type": "number"
             },
@@ -796,7 +753,7 @@
           ],
           "datasource": {
             "type": "yesoreyeram-infinity-datasource",
-            "uid": "${DS_MEMTIERD}"
+            "uid": "B_Smuzf4k"
           },
           "filters": [],
           "format": "table",
@@ -818,7 +775,7 @@
           }
         }
       ],
-      "title": "Page Faults Lowprio Container",
+      "title": "Minor Page Faults Diff Lowprio Container",
       "type": "timeseries"
     }
   ],
@@ -838,6 +795,6 @@
   "timezone": "",
   "title": "Memtierd Demo",
   "uid": "dD04zsf4z",
-  "version": 13,
+  "version": 15,
   "weekStart": ""
 }
