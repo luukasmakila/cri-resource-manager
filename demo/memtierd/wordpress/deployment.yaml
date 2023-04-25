@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+        - name: wordpress
+          image: wordpress:5-php7.1-apache
+          ports:
+          - containerPort: 80
+            name: wordpress
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /var/www
+            # - name: apache-config
+            #   mountPath: /etc/apache2/sites-available/000-default.conf
+            #   subPath: apache.conf
+          env:
+            # Annoyingly repetitive -- envFrom: is a nicer way to do this with a ConfigMap or Secret
+            - name: WORDPRESS_DB_HOST
+              value: mysql.default.svc.cluster.local
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wp-db-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: WORDPRESS_DB_USER
+              value: root
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+      volumes:
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: wordpress-volume
+        # - name: apache-config
+        #   configMap:
+        #     name: apache-config
+        #     items:
+        #       - key: apache.conf
+        #         path: apache.conf

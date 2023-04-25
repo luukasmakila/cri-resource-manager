@@ -8,6 +8,8 @@ from fastapi import FastAPI
 # File path variables to fetch data from
 ZRAM_PATH =  "/sys/block/zram0/mm_stat"
 
+MEMINFO_PATH = "/proc/meminfo"
+
 LOWPRIO_1_PATH = "/tmp/memtierd/meme-pod-lowprio/memtierd.meme-pod-lowprio-1-container.output"
 LOWPRIO_1_FILE_NAME = "memtierd.meme-pod-lowprio-1-container.output"
 LOWPRIO_1_TIME_SERIES_PATH = "/home/ubuntu/prometheus_backend/data/lowprio_1_time_series.json"
@@ -127,18 +129,26 @@ def handle_zram_and_compressed_data(data):
 	Handle the zram related stuff here
 	"""
 
-	file_path = ZRAM_PATH
+	zram_file_path = ZRAM_PATH
+	proc_meminfo_path = MEMINFO_PATH
 
 	orig_data_size = 0
 	comp_data_size = 0
 	mem_used_total = 0
 
-	with open(file_path) as file:
+	# Get the zram data
+	with open(zram_file_path) as file:
 		for line in file:
 			zram_data = line.split()
 			orig_data_size = zram_data[0]
 			comp_data_size = zram_data[1]
 			mem_used_total = zram_data[2]
+
+	# Get the total memory of the system
+	#with open(proc_meminfo_path) as file:
+	#	for line in file:
+	#		if "MemTotal" in line:
+	#			print(line)
 
 	data["zram_and_compressed"] = {}
 
@@ -228,7 +238,7 @@ def read_stats(fetch_time_series_highprio_1: int = 0, fetch_time_series_lowprio_
 	lowprio_1_file_path = LOWPRIO_1_PATH
 
 	highprio_1_file_name = HIGHPRIO_1_FILE_NAME
-	lowprio_1_file_name = HIGHPRIO_1_FILE_NAME
+	lowprio_1_file_name = LOWPRIO_1_FILE_NAME
 
 	file_paths = [highprio_1_file_path, lowprio_1_file_path]
 
