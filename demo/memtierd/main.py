@@ -145,16 +145,26 @@ def handle_zram_and_compressed_data(data):
 			mem_used_total = zram_data[2]
 
 	# Get the total memory of the system
-	#with open(proc_meminfo_path) as file:
-	#	for line in file:
-	#		if "MemTotal" in line:
-	#			print(line)
+	mem_total = 0
+	with open(proc_meminfo_path) as file:
+		for line in file:
+			if "MemTotal" in line:
+				mem_total = line.split(" ")[-2]
+				break
 
 	data["zram_and_compressed"] = {}
 
+	# Turn mem_total to GB
+	mem_total = int(mem_total) / 1024**2
+
 	# Get total memory saved
 	saved_memory_total = (int(orig_data_size) - int(mem_used_total)) / 1000000000
+
+	# ~14.285714285714285 %
+	saved_memory_percentage = (int(saved_memory_total) / int(mem_total)) * 100
+
 	data["zram_and_compressed"]["save_memory_total"] = saved_memory_total
+	data["zram_and_compressed"]["saved_memory_percentage"] = saved_memory_percentage
 
 	compressed = 100 - (100 * int(comp_data_size) / int(orig_data_size))
 	data["zram_and_compressed"]["compressed"] = compressed
