@@ -2,6 +2,7 @@
 
 ## Prerequisites
 - Ubuntu system with a Swap
+- Memtierd and Meme installed
 - Python 3
 - NRI enabled on your container runtime (Containerd/CRI-O)
 - Grafana dashboard ready to go
