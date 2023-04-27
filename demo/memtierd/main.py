@@ -158,7 +158,7 @@ def handle_zram_and_compressed_data(data):
 	data["zram_and_compressed"] = {}
 
 	# Turn mem_total to GB
-	mem_total = int(mem_total) / 1024**2
+	mem_total = int(mem_total) / 1000**2
 
 	# Get total memory saved
 	saved_memory_total = (int(orig_data_size) - int(mem_used_total)) / 1000000000

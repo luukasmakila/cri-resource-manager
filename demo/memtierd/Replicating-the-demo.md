@@ -3,13 +3,13 @@
 ## Prerequisites
 - Ubuntu system with a Swap
 - Python 3
-- NRI enabled on your container runtime
+- NRI enabled on your container runtime (Containerd/CRI-O)
 - Grafana dashboard ready to go
 - Grafana [infinity](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) data source plugin downloaded
 
 ## Installing the Memtierd grafana dashboard
 
-- Go to the "Data Sources" tab and apply the Infinity data source
+- Go to the "Data Sources" tab and apply the Infinity data source (needed to handle the showcase the json data)
 - Go to the "Dashboards" section on Grafana
 - Click "New" and then "Import"
 - Download the "memtierd-demo-grafana-dashboard.json" file and import it
@@ -17,7 +17,7 @@
 
 ## Running the API
 
-Edit the "path" variables found on the top of the main.py file to point to the correct data files in data/ aswell as zram path. When ran with the default workloads /tmp/memtierd directory will be created so unless the workload configurations are changed, those paths won't need editing.
+Edit the "path" variables found on the top of the main.py file to point to the correct data files in data/ aswell as zram and meminfo paths. When ran with the default workloads /tmp/memtierd directory will be created to read the output from so unless the workload configurations are changed, those paths won't need editing.
 
 Install FastAPI:
 ```
@@ -27,6 +27,24 @@ console pip install fastapi
 Start the API with:
 ```console
 uvicorn main:app --reload
+```
+
+Make sure the files in data/ are in the correct format:
+
+Page faults files:
+```json
+{
+    "page_faults_highprio/lowprio_1": [
+    ]
+}
+```
+
+Time series files:
+```json
+{
+    "time_series_highprio/lowprio_1": [
+    ]
+}
 ```
 
 ## Configuring the Memtierd NRI plugin:
