@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: meme-pod-highprio
+  labels:
+    app: meme-pod-highprio
+  annotations:
+    class.memtierd.nri: "high-prio"
+spec:
+  containers:
+  - name: meme-pod-highprio-1-container
+    image: luukasmakila/meme
+    imagePullPolicy: Always
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: nri-socket
+        mountPath: /var/run/nri.sock
+      - name: host-volume
+        mountPath: /host
+      - name: host-bitmap
+        mountPath: /sys/kernel/mm/page_idle/bitmap
+  - name: meme-pod-highprio-2-container
+    image: luukasmakila/meme
+    imagePullPolicy: Always
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: nri-socket
+        mountPath: /var/run/nri.sock
+      - name: host-volume
+        mountPath: /host
+      - name: host-bitmap
+        mountPath: /sys/kernel/mm/page_idle/bitmap
+  volumes:
+    - name: nri-socket
+      hostPath:
+        path: /var/run/nri.sock
+    - name: host-volume
+      hostPath:
+        path: /
+    - name: host-bitmap
+      hostPath:
+        path: /sys/kernel/mm/page_idle/bitmap
