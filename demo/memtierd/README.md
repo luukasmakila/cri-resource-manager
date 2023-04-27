@@ -28,3 +28,5 @@ RAM vs Swap
 
 Page faults
 - Tells how many new page faults happen in between the requests from Grafana. This is a way to express the possible performance hit workloads experience if being tracked by Memtierd.
+
+![alt text](https://github.com/luukasmakila/cri-resource-manager/blob/memtier-nri/demo/memtierd/memtierd-demo.png)
