@@ -112,7 +112,10 @@ def handle_page_faults():
 		stdout, stderr = process.communicate()
 		ps_output = stdout.decode("utf-8").split(" ")
 		memtierd_config_path = ps_output[-1].strip("\n")
-		memtierd_processes.append({"pid": pid, "config_path": memtierd_config_path})
+
+		# Check if process for certain config is already in the dictionary
+		if not any(d["config_path"] == memtierd_config_path for d in memtierd_processes):
+			memtierd_processes.append({"pid": pid, "config_path": memtierd_config_path})
 
 	# Get the page faults
 	for memtierd_process in memtierd_processes:
@@ -159,8 +162,6 @@ def handle_zram_and_compressed_data(data):
 
 	# Get total memory saved
 	saved_memory_total = (int(orig_data_size) - int(mem_used_total)) / 1000000000
-
-	# ~14.285714285714285 %
 	saved_memory_percentage = (int(saved_memory_total) / int(mem_total)) * 100
 
 	data["zram_and_compressed"]["save_memory_total"] = saved_memory_total
