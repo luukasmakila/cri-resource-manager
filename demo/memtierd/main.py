@@ -1,3 +1,7 @@
+"""
+This handles the requests from Grafana and returns the requested data in the correct format
+"""
+
 import json
 import time
 import subprocess
@@ -34,7 +38,6 @@ def write_json(data, filename):
 
 
 def add_page_fault_data(data, page_faults_data, page_faults_data_path, page_faults_data_key, file_name, page_fault_index):
-	# TODO: instead of passing page_faults_data + page_fault_index, just pass the correct page fault data block from the main function?	
 
 	# Get the current total page faults
 	curr_page_faults = page_faults_data[page_fault_index]["curr_page_faults"]
