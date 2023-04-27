@@ -14,14 +14,17 @@ This annotation defines whether the workload will be swapped agressively (low-pr
 
 ## About the metrics
 
-Total memory saved (G)
-- Tells how much RAM is being saved by swapping out the idle workloads
+Total Memory Saved (G)
+- Tells how much RAM is being saved by swapping out the idle workloads.
+
+Total Memory Saved (%)
+- Tells how big the total memory saved is in comparsin to the overall memory of the system.
 
 Compressed (%)
-- Tells how well the data is being compressed
+- Tells how well the data is being compressed.
 
 RAM vs Swap
-- Tells how the memory is being distributed between RAM and Swap
+- Tells how the memory is being distributed between RAM and Swap.
 
 Page faults
-- Tells how many new page faults happen in a certain time period
+- Tells how many new page faults happen in between the requests from Grafana. This is a way to express the possible performance hit workloads experience if being tracked by Memtierd.
