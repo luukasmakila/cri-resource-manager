@@ -14,10 +14,10 @@ This annotation defines whether the workload will be swapped agressively (low-pr
 
 ## About the metrics
 
-Total Memory Saved (G)
+RAM Saved (G)
 - Tells how much RAM is being saved by swapping out the idle workloads.
 
-Total Memory Saved (%)
+RAM Saved (%)
 - Tells how big the total memory saved is in comparsin to the overall memory of the system.
 
 Compressed (%)
