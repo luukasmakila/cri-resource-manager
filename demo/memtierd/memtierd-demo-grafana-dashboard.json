@@ -83,7 +83,12 @@
           "columns": [
             {
               "selector": "save_memory_total",
-              "text": "Total Memory Saved (G)",
+              "text": "RAM Saved (G)",
+              "type": "number"
+            },
+            {
+              "selector": "saved_memory_percentage",
+              "text": "RAM Saved (%)",
               "type": "number"
             },
             {
@@ -201,7 +206,7 @@
           }
         }
       ],
-      "title": "Critical Container RAM vs Swap",
+      "title": "Highprio Container RAM vs Swap",
       "type": "piechart"
     },
     {
@@ -412,7 +417,7 @@
           }
         }
       ],
-      "title": "Critical Container Swap vs Swap + RAM (kB)",
+      "title": "Highprio Container Swap vs Swap + RAM (kB)",
       "type": "timeseries"
     },
     {
@@ -788,8 +793,8 @@
     "list": []
   },
   "time": {
-    "from": "2023-03-28T13:54:27.064Z",
-    "to": "2023-03-28T14:08:45.702Z"
+    "from": "now-15m",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "",
