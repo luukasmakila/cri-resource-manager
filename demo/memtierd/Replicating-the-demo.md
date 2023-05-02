@@ -1,9 +1,9 @@
 # Replicating the Memtierd demo
 
 ## Prerequisites
+- Python 3
 - Ubuntu system with a Swap
 - Memtierd and Meme installed
-- Python 3
 - NRI enabled on your container runtime (Containerd/CRI-O)
 - Grafana dashboard ready to go
 - Grafana [infinity](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) data source plugin downloaded

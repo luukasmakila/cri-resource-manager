@@ -165,7 +165,7 @@ def handle_zram_and_compressed_data(data):
 
 	# Get total memory saved
 	saved_memory_total = (int(orig_data_size) - int(mem_used_total)) / 1000000000
-	saved_memory_percentage = (int(saved_memory_total) / int(mem_total)) * 100
+	saved_memory_percentage = (float(saved_memory_total) / float(mem_total)) * 100
 
 	data["zram_and_compressed"]["save_memory_total"] = saved_memory_total
 	data["zram_and_compressed"]["saved_memory_percentage"] = saved_memory_percentage
@@ -247,7 +247,6 @@ def read_stats(fetch_time_series_highprio_1: int = 0, fetch_time_series_lowprio_
 
 	data = {}
 
-	# TODO: Figure out a way not to hardcode these paths, maybe check /tmp/memtierd recursively?
 	highprio_1_file_path = HIGHPRIO_1_PATH
 	lowprio_1_file_path = LOWPRIO_1_PATH
 
@@ -295,8 +294,5 @@ def read_stats(fetch_time_series_highprio_1: int = 0, fetch_time_series_lowprio_
 			page_faults_data_path = HIGHPRIO_1_PAGE_FAULTS_PATH
 			page_faults_data_key = "page_faults_highprio_1"
 			add_page_fault_data(data, page_faults_data, page_faults_data_path, page_faults_data_key, curr_file_name,  i)
-
-		if "highprio-1" not in page_faults_data[i]["config_path"] and "lowprio-1" not in page_faults_data[i]["config_path"]:
-			continue
 
 	return data
