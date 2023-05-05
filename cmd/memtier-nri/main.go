@@ -279,8 +279,8 @@ func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName str
 	}
 
 	// Create directory if it doesn't exist
-	podDirectory := fmt.Sprintf("/host/tmp/memtierd/%s", podName)
-	if err := os.MkdirAll(podDirectory, 0755); err != nil {
+	podDirectory := fmt.Sprintf("/tmp/memtierd/%s", podName)
+	if err := os.MkdirAll("/host"+podDirectory, 0755); err != nil {
 		log.Fatalf("Error creating directory: %v", err)
 	}
 
@@ -312,7 +312,7 @@ func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName str
 		log.Fatalf("Error marshaling YAML: %v\n", err)
 	}
 
-	configFilePath := fmt.Sprintf(podDirectory+"/%s.yaml", containerName)
+	configFilePath := fmt.Sprintf("/host"+podDirectory+"/%s.yaml", containerName)
 	err = ioutil.WriteFile(configFilePath, out, 0644)
 	if err != nil {
 		log.Fatalf("Error writing YAML file: %v\n", err)
@@ -333,13 +333,13 @@ func startMemtierd(podName string, containerName string, podDirectory string, ou
 	log.Infof("Starting Memtierd")
 
 	// Open the output file for writing
-	outputFile, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	outputFile, err := os.OpenFile("/host"+outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open output file: %v\n", err)
 	}
-	defer outputFile.Close()
+	//defer outputFile.Close()
 
-	socketPath := fmt.Sprintf(podDirectory+"/memtierd.%s.sock", containerName)
+	socketPath := fmt.Sprintf("/host"+podDirectory+"/memtierd.%s.sock", containerName)
 
 	file, err := os.Create(socketPath)
 	if err != nil {
