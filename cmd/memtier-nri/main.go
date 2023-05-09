@@ -136,7 +136,7 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	podName := pod.GetName()
 	containerName := ctr.GetName()
 	annotations := pod.GetAnnotations()
-	template := "memtierd-age-swapidle.yaml"
+	template := ""
 
 	// If memtierd annotation is not present, don't execute further
 	priority, ok := annotations["class.memtierd.nri"]
