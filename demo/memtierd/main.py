@@ -43,6 +43,7 @@ def add_page_fault_data(data, page_faults_data, page_faults_data_path, page_faul
 	curr_page_faults = page_faults_data[page_fault_index]["curr_page_faults"]
 	curr_page_faults_minor = page_faults_data[page_fault_index]["page_faults_minor"]
 	curr_page_faults_major = page_faults_data[page_fault_index]["page_faults_major"]
+
 	with open(page_faults_data_path) as file:
 		prev_data = json.load(file)
 
@@ -163,7 +164,7 @@ def handle_zram_and_compressed_data(data):
 	# Turn mem_total to GB
 	mem_total = int(mem_total) / 1000**2
 
-	# Get total memory saved
+	# Get total memory saved and mem saved percentage
 	saved_memory_total = (int(orig_data_size) - int(mem_used_total)) / 1000000000
 	saved_memory_percentage = (float(saved_memory_total) / float(mem_total)) * 100
 

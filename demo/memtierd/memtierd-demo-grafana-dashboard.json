@@ -784,7 +784,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "",
+  "refresh": "30s",
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
@@ -800,6 +800,6 @@
   "timezone": "",
   "title": "Memtierd Demo",
   "uid": "dD04zsf4z",
-  "version": 15,
+  "version": 16,
   "weekStart": ""
 }
