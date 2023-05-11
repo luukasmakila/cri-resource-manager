@@ -272,7 +272,8 @@ func getFullCgroupPath(ctr *api.Container) []byte {
 }
 
 func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName string, template string) (string, string, string) {
-	templatePath := fmt.Sprintf("/host/home/ubuntu/templates/%s", template)
+	// /host/home/ubuntu/template <- Path on host
+	templatePath := fmt.Sprintf("/templates/%s", template)
 	yamlFile, err := ioutil.ReadFile(templatePath)
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v\n", err)
