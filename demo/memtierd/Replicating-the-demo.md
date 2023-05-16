@@ -2,8 +2,7 @@
 
 ## Prerequisites
 - Python 3
-- Ubuntu system with a Swap
-- Memtierd and Meme installed
+- Memtierd and Meme installed see [here](https://github.com/askervin/cri-resource-manager/tree/5FD_memtierd_devel/cmd/memtierd)
 - NRI enabled on your container runtime (Containerd/CRI-O)
 - Grafana dashboard ready to go
 - Grafana [infinity](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) data source plugin downloaded
@@ -15,6 +14,27 @@
 - Click "New" and then "Import"
 - Download the "memtierd-demo-grafana-dashboard.json" file and import it
 - Select Infinity data source as the data source
+
+## Creating a swap in RAM
+
+Needed in Ubuntu because zram.ko kernel module might not be installed in the system by default
+```console
+apt install linux-modules-extra-$(uname -r)
+```
+
+Create a 4GB compressed swap in RAM
+```console
+modprobe zram
+echo 4G > /sys/block/zram0/disksize
+mkswap /dev/zram0
+swapon /dev/zram0
+```
+
+Check that the swap got created
+```console
+free -h
+```
+
 
 ## Running the API
 
