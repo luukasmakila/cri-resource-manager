@@ -36,6 +36,11 @@ free -h
 ```
 
 
+
+ADD POD MEMTIER TO MEMTIER-NRI TEMPLATES AND APPLY FROM THERE
+
+
+
 ## Running the API
 
 Edit the "path" variables found on the top of the main.py file to point to the correct data files in data/ aswell as zram and meminfo paths. When ran with the default workloads /tmp/memtierd directory will be created to read the output from so unless the workload configurations are changed, those paths won't need editing.

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-memtier
+  labels:
+    app: pod-memtier
+spec:
+  hostPID: true
+  containers:
+  - name: pod-memtier
+    image: luukasmakila/memtier-nri
+    imagePullPolicy: Always
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: nri-socket
+        mountPath: /var/run/nri/nri.sock
+      - name: host-volume
+        mountPath: /host
+      - name: host-bitmap
+        mountPath: /sys/kernel/mm/page_idle/bitmap
+      - name: memtierd-data
+        mountPath: /tmp/memtierd
+  volumes:
+    - name: nri-socket
+      hostPath:
+        path: /var/run/nri/nri.sock
+    - name: host-volume
+      hostPath:
+        path: /
+    - name: host-bitmap
+      hostPath:
+        path: /sys/kernel/mm/page_idle/bitmap
+    - name: memtierd-data
+      hostPath:
+        path: /tmp/memtierd
