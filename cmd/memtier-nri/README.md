@@ -6,12 +6,15 @@
 ## Making your own image
 
 ```console
+# Build the image
 docker build . -t memtier-nri
 
-# Then docker push the image to your registry
+# Then tag and push the image to your registry
+docker tag memtier-nri <your registry>
+docker push <your registry>
 ```
 
-See [running Memtierd NRI plugin in a pod](#running-memtierd-nri-plugin-in-a-pod)
+See [running Memtierd NRI plugin in a pod](#running-memtierd-nri-plugin-in-a-pod) on how to deploy it.
 
 ## Running a self compiled version locally
 
@@ -48,7 +51,7 @@ Now the plugin is ready to recognize events happening in the cluster.
 
 ## <a name="running-memtierd-nri-plugin-in-a-pod"></a> Running Memtierd NRI plugin in a pod
 
-To run Memtierd NRI plugin in a pod deploy the following pod to your cluster simply run:
+To run Memtierd NRI plugin in a pod change the image in templates/pod-memtier-nri.yaml to point at your image and then deploy the pod to your cluster:
 
 ```console
 kubectl apply -f templates/pod-memtier-nri.yaml
