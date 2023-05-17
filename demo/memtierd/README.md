@@ -1,5 +1,7 @@
 # Memtierd demo
 
+To replicate the demo see [replicating the demo](https://github.com/luukasmakila/cri-resource-manager/blob/memtier-nri/demo/memtierd/Replicating-the-demo.md) for instructions.
+
 ## What was showcased
 
 The demo showcases the differenece between how low priority and high priority workloads are treated when using Memtierd as the memory manager. Low priority workloads and high priority workloads are defined by giving your deployments the following annotations:
