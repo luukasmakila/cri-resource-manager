@@ -136,19 +136,19 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	podName := pod.GetName()
 	containerName := ctr.GetName()
 	annotations := pod.GetAnnotations()
-	template := ""
 
 	// If memtierd annotation is not present, don't execute further
-	priority, ok := annotations["class.memtierd.nri"]
+	class, ok := annotations["class.memtierd.nri"]
 	if !ok {
 		return nil
 	}
 
-	if priority == "low-prio-configuration" {
-		template = "low-prio-configuration.yaml"
-	}
-	if priority == "high-prio-configuration" {
-		template = "high-prio-configuration.yaml"
+	// You can specify the template here based on the given class ex. class.memtierd.nri: low-prio -> template = low-prio.yaml
+	// Plugin looks in the /template directory and looks for the low-prio.yaml then
+	template := ""
+
+	if class == "add your class name here" {
+		template = "add the corresponding template name here"
 	}
 
 	fullCgroupPath := getFullCgroupPath(ctr)
