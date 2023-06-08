@@ -144,11 +144,11 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 		return nil
 	}
 
-	if priority == "low-prio" {
-		template = "low-prio.yaml"
+	if priority == "low-prio-configuration" {
+		template = "low-prio-configuration.yaml"
 	}
-	if priority == "high-prio" {
-		template = "high-prio.yaml"
+	if priority == "high-prio-configuration" {
+		template = "high-prio-configuration.yaml"
 	}
 
 	fullCgroupPath := getFullCgroupPath(ctr)
@@ -333,12 +333,10 @@ func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName str
 func startMemtierd(podName string, containerName string, podDirectory string, outputFilePath string, configFilePath string) {
 	log.Infof("Starting Memtierd")
 
-	// Open the output file for writing
 	outputFile, err := os.OpenFile("/host"+outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open output file: %v\n", err)
 	}
-	//defer outputFile.Close()
 
 	socketPath := fmt.Sprintf("/host"+podDirectory+"/memtierd.%s.sock", containerName)
 
@@ -347,9 +345,6 @@ func startMemtierd(podName string, containerName string, podDirectory string, ou
 		fmt.Println(err)
 	}
 	defer file.Close()
-
-	log.Infof(socketPath)
-	log.Infof(configFilePath)
 
 	// Create the command and write its output to the output file
 	socatCommand := fmt.Sprintf("socat unix-listen:%s,fork,unlink-early - | memtierd -config %s", socketPath, configFilePath)

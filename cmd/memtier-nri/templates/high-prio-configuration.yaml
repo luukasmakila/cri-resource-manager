@@ -23,13 +23,19 @@ policy:
     # The policy reads tracker counters and acts based on them in
     # IntervalMs (milliseconds) periods.
     intervalms: 10000
+
     # The policy manages processes that can be found under listed
     # cgroups paths.
-    cgroups:
-      - $CGROUP2_ABS_PATH
+    pidwatcher:
+      name: cgroups
+      config: |
+        cgroups:
+          - $CGROUP2_ABS_PATH
+
     # If the tracker has not seen activity on a page region during last
     # swapoutms, the region will be swapped out.
     swapoutms: 10000
+
     # The policy uses the idlepage tracker to make sure that it will
     # not swap out memory that is used. The softdirty tracker cannot
     # detect page reads, and the damon tracker may not detect activity
@@ -44,6 +50,7 @@ policy:
         maxcountperregion: 1
         # No need to scan more often than the policy acts.
         scanintervalms: 10000
+
     # Low-level page mover and swapper configuration.
     mover:
       # IntervalMs is the period (in milliseconds) how often next
