@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"syscall"
 
@@ -140,6 +141,20 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	// If memtierd annotation is not present, don't execute further
 	class, ok := annotations["class.memtierd.nri"]
 	if !ok {
+		return nil
+	}
+
+	// Check that class is of correct form
+	pattern := "^[A-Za-z0-9_-]+$"
+	regex, err := regexp.Compile(pattern)
+	if err != nil {
+		// Handle error if the pattern is invalid
+		log.Fatalf("Invalid regex pattern:", err)
+		return nil
+	}
+
+	if !regex.MatchString(class) {
+		log.Fatalf("Invalid memtierd.class.nri!")
 		return nil
 	}
 
