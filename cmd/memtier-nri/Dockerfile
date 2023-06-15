@@ -18,6 +18,7 @@ RUN GO111MODULE=on go get -u github.com/containerd/nri/pkg/stub
 RUN GO111MODULE=on go get -u github.com/sirupsen/logrus
 RUN GO111MODULE=on go get -u gopkg.in/yaml.v2
 
+# Build the plugin binary
 RUN go build -gcflags "all=-N -l"
 
 RUN sudo mkdir -p /opt/nri/plugins/

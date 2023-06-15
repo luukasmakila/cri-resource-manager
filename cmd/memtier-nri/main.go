@@ -162,8 +162,8 @@ func (p *plugin) StartContainer(pod *api.PodSandbox, ctr *api.Container) error {
 	// Plugin looks in the /template directory and looks for the low-prio.yaml then
 	template := ""
 
-	if class == "add your class name here" {
-		template = "add the corresponding template name here"
+	if class == "low-prio-configuration" {
+		template = "low-prio-configuration.yaml"
 	}
 
 	fullCgroupPath := getFullCgroupPath(ctr)
@@ -355,15 +355,14 @@ func startMemtierd(podName string, containerName string, podDirectory string, ou
 
 	socketPath := fmt.Sprintf("/host"+podDirectory+"/memtierd.%s.sock", containerName)
 
-	file, err := os.Create(socketPath)
+	_, err = os.Create(socketPath)
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer file.Close()
 
 	// Create the command and write its output to the output file
-	socatCommand := fmt.Sprintf("socat unix-listen:%s,fork,unlink-early - | memtierd -config %s", socketPath, configFilePath)
-	cmd := exec.Command("sh", "-c", socatCommand)
+	memtierdCommand := fmt.Sprintf("memtierd -config %s", configFilePath)
+	cmd := exec.Command("sh", "-c", memtierdCommand)
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 
