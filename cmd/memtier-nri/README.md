@@ -1,5 +1,7 @@
 # Memtierd NRI plugin
 
+An easy way to start using [Memtierd](https://github.com/intel/memtierd/tree/main) as a memory manager in your Kubernetes cluster.
+
 ## Prerequisities
 - NRI enabled on your container runtime
 
@@ -8,7 +10,7 @@
 The Memtierd binary needs to built first. To do so, follow the instructions found [here](https://github.com/intel/memtierd/tree/main/cmd/memtierd).
 
 ```console
-# Move the memtierd binary here
+# Move the memtierd binary here, so that it will be involved in the image
 mv /bin/memtierd .
 
 # Build the image
