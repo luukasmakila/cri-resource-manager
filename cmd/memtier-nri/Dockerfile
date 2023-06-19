@@ -21,8 +21,8 @@ RUN GO111MODULE=on go get -u gopkg.in/yaml.v2
 # Build the plugin binary
 RUN go build -gcflags "all=-N -l"
 
+# Make the plugin directory & add the plugin there
 RUN sudo mkdir -p /opt/nri/plugins/
-
 RUN mv memtier-nri /opt/nri/plugins/10-memtier-nri
 
 RUN mv memtierd /bin

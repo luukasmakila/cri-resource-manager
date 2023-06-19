@@ -5,12 +5,17 @@
 
 ## Making your own image
 
+The Memtierd binary needs to built first. To do so, follow the instructions found [here](https://github.com/intel/memtierd/tree/main/cmd/memtierd).
+
 ```console
+# Move the memtierd binary here
+mv /bin/memtierd .
+
 # Build the image
-docker build . -t memtier-nri
+docker build . -t memtierd-nri
 
 # Then tag and push the image to your registry
-docker tag memtier-nri <your registry>
+docker tag memtierd-nri <your registry>
 docker push <your registry>
 ```
 
@@ -57,7 +62,7 @@ To run Memtierd NRI plugin in a pod change the image in templates/pod-memtier-nr
 kubectl apply -f templates/pod-memtier-nri.yaml
 ```
 
-## Using memtierd with your deployments
+## Using Memtierd with your deployments
 
 Workload configurations are defined with the "class.memtierd.nri" annotation. Now for example the following annotation:
 

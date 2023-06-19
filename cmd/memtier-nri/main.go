@@ -294,7 +294,7 @@ func editMemtierdConfig(fullCgroupPath []byte, podName string, containerName str
 		log.Fatalf("Error reading YAML file: %v\n", err)
 	}
 
-	// Create directory if it doesn't exist
+	// Create pod directory if it doesn't exist
 	podDirectory := fmt.Sprintf("/tmp/memtierd/%s", podName)
 	if err := os.MkdirAll("/host"+podDirectory, 0755); err != nil {
 		log.Fatalf("Error creating directory: %v", err)
@@ -353,16 +353,8 @@ func startMemtierd(podName string, containerName string, podDirectory string, ou
 		fmt.Printf("Failed to open output file: %v\n", err)
 	}
 
-	socketPath := fmt.Sprintf("/host"+podDirectory+"/memtierd.%s.sock", containerName)
-
-	_, err = os.Create(socketPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	// Create the command and write its output to the output file
-	memtierdCommand := fmt.Sprintf("memtierd -config %s", configFilePath)
-	cmd := exec.Command("sh", "-c", memtierdCommand)
+	cmd := exec.Command("memtierd", "-c", "", "-config", configFilePath)
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 
