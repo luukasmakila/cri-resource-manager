@@ -74,4 +74,4 @@ class.memtierd.nri: "high-prio-configuration"
 
 Starts memtierd for the workload with the configuration found in "templates/high-prio-configuration.yaml"
 
-Currently the plugin supports "low-prio" and "high-prio" workloads. Low-prio means that the workload can be swapped out alot while high-prio means the exact opposite. You can obviously add whatever configurations you need in the code. The code looks in the templates/ directory for the configurations.
+Workloads need to run in privileged state.
