@@ -7,9 +7,9 @@ To replicate the demo see [replicating the demo](https://github.com/luukasmakila
 The demo showcases the differenece between how low priority and high priority workloads are treated when using Memtierd as the memory manager. Low priority workloads and high priority workloads are defined by giving your deployments the following annotations:
 
 ```yaml
-class.memtierd.nri: "high-prio"
+class.memtierd.nri: "high-prioconfiguration"
 # or
-class.memtierd.nri: "low-prio"
+class.memtierd.nri: "low-prio-configuration"
 ```
 
 This annotation defines whether the workload will be swapped agressively (low-prio) or more moderately (high-prio). More agressive swapping will lead to an increase in the number of page faults the process will have.
@@ -17,18 +17,18 @@ This annotation defines whether the workload will be swapped agressively (low-pr
 ## About the metrics
 
 RAM Saved (G)
-- Tells how much RAM is being saved by swapping out the idle workloads.
+- How much RAM is being saved by swapping out the idle workloads.
 
 RAM Saved (%)
-- Tells how big the total memory saved is in comparsin to the overall memory of the system.
+- How big the total memory saved is in comparison to the overall memory of the system.
 
 Compressed (%)
-- Tells how well the data is being compressed.
+- How well the data is being compressed.
 
 RAM vs Swap
-- Tells how the memory is being distributed between RAM and Swap.
+- How the memory is being distributed between RAM and the swap.
 
 Page faults
-- Tells how many new page faults happen in between the requests from Grafana. This is a way to express the possible performance hit workloads experience if being tracked by Memtierd.
+- How many new page faults happen in between the requests from Grafana. This is a way to express the possible performance hit workloads experience if being tracked by Memtierd.
 
 ![alt text](https://github.com/luukasmakila/cri-resource-manager/blob/memtier-nri/demo/memtierd/memtierd-demo.png)
